@@ -102,3 +102,121 @@ function clearResult() {
         <p>Enter a waste item to get guidance.</p>
     `;
 }
+// Voice Input
+
+function startVoiceInput() {
+
+    if (!("webkitSpeechRecognition" in window)) {
+        alert("Voice input is not supported in this browser.");
+        return;
+    }
+
+    const recognition = new webkitSpeechRecognition();
+
+    recognition.lang = "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = function () {
+        document.getElementById("wasteInput").placeholder =
+            "🎤 Listening...";
+    };
+
+    recognition.onresult = function (event) {
+
+        const spokenText = event.results[0][0].transcript;
+
+        document.getElementById("wasteInput").value = spokenText;
+
+        document.getElementById("wasteInput").placeholder =
+            "Example: plastic bottle";
+    };
+
+    recognition.onerror = function () {
+
+        document.getElementById("wasteInput").placeholder =
+            "Example: plastic bottle";
+
+        alert("Could not understand your voice. Please try again.");
+    };
+
+    recognition.start();
+}
+// Camera Access
+
+let cameraStream = null;
+
+async function openCamera() {
+
+    const cameraArea = document.getElementById("cameraArea");
+    const video = document.getElementById("camera");
+
+    try {
+
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "environment"
+            },
+            audio: false
+        });
+
+        video.srcObject = cameraStream;
+        cameraArea.style.display = "block";
+
+    } catch (error) {
+
+        alert(
+            "Camera access was denied or is not available. " +
+            "Please allow camera permission and try again."
+        );
+
+        console.error(error);
+    }
+}
+
+
+// Capture Image
+
+function captureWasteImage() {
+
+    const video = document.getElementById("camera");
+    const canvas = document.getElementById("cameraCanvas");
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const context = canvas.getContext("2d");
+
+    context.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    alert("📸 Waste image captured successfully!");
+
+    closeCamera();
+}
+
+
+// Close Camera
+
+function closeCamera() {
+
+    const cameraArea = document.getElementById("cameraArea");
+
+    if (cameraStream) {
+
+        cameraStream.getTracks().forEach(function(track) {
+            track.stop();
+        });
+
+        cameraStream = null;
+    }
+
+    document.getElementById("camera").srcObject = null;
+
+    cameraArea.style.display = "none";
+}

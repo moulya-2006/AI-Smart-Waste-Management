@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>AI Smart Waste Management</title>
     <link rel="stylesheet" href="style.css">
@@ -11,83 +12,7 @@
         <h1>🌱 AI Smart Waste Management Assistant</h1>
         <p>Smart guidance for responsible waste management</p>
     </header>
-        <section class="info-section">
 
-            <h2>🌍 About the Project</h2>
-
-            <p>
-                The AI Smart Waste Management Assistant helps users
-                understand how different waste items can be classified,
-                disposed of, reused, or recycled responsibly.
-            </p>
-
-            <p>
-                This project supports
-                <strong>SDG 12 – Responsible Consumption and Production</strong>
-                by encouraging better waste-management practices.
-            </p>
-
-        </section>
-
-
-        <section class="info-section">
-
-            <h2>⚙️ How It Works</h2>
-
-            <div class="steps">
-
-                <div class="step">
-                    <span>1️⃣</span>
-                    <h3>Enter Waste</h3>
-                    <p>Describe the waste item.</p>
-                </div>
-
-                <div class="step">
-                    <span>2️⃣</span>
-                    <h3>AI Analysis</h3>
-                    <p>The AI analyzes the waste description.</p>
-                </div>
-
-                <div class="step">
-                    <span>3️⃣</span>
-                    <h3>Get Guidance</h3>
-                    <p>Receive disposal and reuse recommendations.</p>
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <section class="info-section">
-
-            <h2>♻️ Waste Categories</h2>
-
-            <div class="categories">
-
-                <div class="category">
-                    <h3>🧴 Plastic</h3>
-                    <p>Plastic bottles, containers and packaging.</p>
-                </div>
-
-                <div class="category">
-                    <h3>📄 Paper</h3>
-                    <p>Newspapers, cardboard and paper products.</p>
-                </div>
-
-                <div class="category">
-                    <h3>🍎 Organic</h3>
-                    <p>Food, fruit and vegetable waste.</p>
-                </div>
-
-                <div class="category">
-                    <h3>🔋 E-Waste</h3>
-                    <p>Phones, batteries, chargers and electronics.</p>
-                </div>
-
-            </div>
-
-        </section>
     <main>
 
         <section class="card">
@@ -99,40 +24,72 @@
             </p>
 
             <input
-    type="text"
-    id="wasteInput"
-    placeholder="Example: plastic bottle"
->
+                type="text"
+                id="wasteInput"
+                placeholder="Example: plastic bottle"
+            >
+            <div class="input-tools">
 
-<div class="examples">
-    <p><b>Try an example:</b></p>
-
-    <button class="example-btn" onclick="useExample('plastic bottle')">
-        🧴 Plastic Bottle
+    <button class="voice-btn" onclick="startVoiceInput()">
+        🎤 Speak
     </button>
 
-    <button class="example-btn" onclick="useExample('newspaper')">
-        📄 Newspaper
+    <button class="camera-btn" onclick="openCamera()">
+        📷 Scan Waste
     </button>
 
-    <button class="example-btn" onclick="useExample('food waste')">
-        🍎 Food Waste
-    </button>
+</div>
+<div id="cameraArea" class="camera-area" style="display: none;">
 
-    <button class="example-btn" onclick="useExample('old mobile phone')">
-        📱 Old Phone
-    </button>
+    <video id="camera" autoplay playsinline></video>
+
+    <div>
+        <button onclick="captureWasteImage()">
+            📸 Capture
+        </button>
+
+        <button class="clear-btn" onclick="closeCamera()">
+            ✖ Close Camera
+        </button>
+    </div>
+
+    <canvas id="cameraCanvas"></canvas>
+
 </div>
 
-<button onclick="analyzeWaste()">
-    🔍 Analyze Waste
-</button>
+            <div class="examples">
 
-<button class="clear-btn" onclick="clearResult()">
-    🧹 Clear
-</button>
+                <p><b>Try an example:</b></p>
 
-<div id="result"></div>
+                <button class="example-btn" onclick="useExample('plastic bottle')">
+                    🧴 Plastic Bottle
+                </button>
+
+                <button class="example-btn" onclick="useExample('newspaper')">
+                    📄 Newspaper
+                </button>
+
+                <button class="example-btn" onclick="useExample('food waste')">
+                    🍎 Food Waste
+                </button>
+
+                <button class="example-btn" onclick="useExample('old mobile phone')">
+                    📱 Old Phone
+                </button>
+
+            </div>
+
+            <button onclick="analyzeWaste()">
+                🔍 Analyze Waste
+            </button>
+
+            <button class="clear-btn" onclick="clearResult()">
+                🧹 Clear
+            </button>
+
+            <div id="result">
+                <p>Enter a waste item to get guidance.</p>
+            </div>
 
         </section>
 
@@ -145,4 +102,5 @@
     <script src="script.js"></script>
 
 </body>
+
 </html>
