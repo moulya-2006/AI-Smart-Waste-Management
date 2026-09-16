@@ -1,103 +1,443 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>AI Smart Waste Management</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>EcoVision AI | Smart Waste Management</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+    <!-- Background decoration -->
+    <div class="background-circle circle-one"></div>
+    <div class="background-circle circle-two"></div>
+
+    <!-- HEADER -->
+
     <header>
-        <h1>🌱 AI Smart Waste Management Assistant</h1>
-        <p>Smart guidance for responsible waste management</p>
+
+        <div class="brand">
+            <div class="brand-icon">♻️</div>
+
+            <div>
+                <h2>EcoVision <span>AI</span></h2>
+                <p>Smart Waste Management</p>
+            </div>
+        </div>
+
+        <div class="sdg-badge">
+            🌍 SDG 12
+        </div>
+
     </header>
 
-    <main>
 
-        <section class="card">
+    <!-- HERO -->
 
-            <h2>♻️ Waste Assistant</h2>
+    <section class="hero">
+
+        <div class="hero-text">
+
+            <div class="ai-label">
+                ✨ AI-POWERED SUSTAINABILITY
+            </div>
+
+            <h1>
+                See Waste.<br>
+                <span>Know Where.</span><br>
+                Act Better.
+            </h1>
 
             <p>
-                Enter the name or description of a waste item:
+                Use AI to identify waste and discover the right
+                way to dispose, reuse or recycle it.
             </p>
 
-            <input
-                type="text"
-                id="wasteInput"
-                placeholder="Example: plastic bottle"
-            >
-            <div class="input-tools">
+        </div>
 
-    <button class="voice-btn" onclick="startVoiceInput()">
-        🎤 Speak
-    </button>
 
-    <button class="camera-btn" onclick="openCamera()">
-        📷 Scan Waste
-    </button>
+        <!-- AI SCANNER -->
 
-</div>
-<div id="cameraArea" class="camera-area" style="display: none;">
+        <div class="scanner-card">
 
-    <video id="camera" autoplay playsinline></video>
+            <div class="scanner-header">
 
-    <div>
-        <button onclick="captureWasteImage()">
-            📸 Capture
-        </button>
+                <div>
+                    <span class="status-dot"></span>
+                    AI WASTE SCANNER
+                </div>
 
-        <button class="clear-btn" onclick="closeCamera()">
-            ✖ Close Camera
-        </button>
-    </div>
+                <span class="online">ONLINE</span>
 
-    <canvas id="cameraCanvas"></canvas>
+            </div>
 
-</div>
+
+            <div class="scanner-area" id="scannerArea">
+
+                <div class="scanner-corners"></div>
+
+                <div class="scanner-icon">
+                    ♻️
+                </div>
+
+                <h3 id="scannerTitle">
+                    What do you want to analyze?
+                </h3>
+
+                <p id="scannerText">
+                    Scan, upload, speak or type your waste item
+                </p>
+
+                <div class="scan-line"></div>
+
+            </div>
+
+
+            <!-- TEXT INPUT -->
+
+            <div class="input-section">
+
+                <input
+                    type="text"
+                    id="wasteInput"
+                    placeholder="Example: plastic bottle, old phone..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <!-- ACTION BUTTONS -->
+
+            <div class="action-buttons">
+
+                <button
+                    class="primary-btn"
+                    onclick="openCamera()">
+                    📷 Scan Waste
+                </button>
+
+                <button
+                    class="secondary-btn"
+                    onclick="startVoiceInput()">
+                    🎤 Speak
+                </button>
+
+            </div>
+
+
+            <button
+                class="analyze-btn"
+                onclick="analyzeWaste()">
+
+                ✨ Analyze with AI
+
+            </button>
+
+
+            <!-- EXAMPLES -->
 
             <div class="examples">
 
-                <p><b>Try an example:</b></p>
+                <p>Try an example</p>
 
-                <button class="example-btn" onclick="useExample('plastic bottle')">
-                    🧴 Plastic Bottle
+                <div class="example-buttons">
+
+                    <button onclick="useExample('plastic bottle')">
+                        🧴 Plastic Bottle
+                    </button>
+
+                    <button onclick="useExample('newspaper')">
+                        📄 Newspaper
+                    </button>
+
+                    <button onclick="useExample('food waste')">
+                        🍎 Food Waste
+                    </button>
+
+                    <button onclick="useExample('old mobile phone')">
+                        📱 Old Phone
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CAMERA SECTION -->
+
+    <section
+        id="cameraArea"
+        class="camera-modal"
+        style="display:none;">
+
+        <div class="camera-box">
+
+            <button
+                class="close-camera"
+                onclick="closeCamera()">
+                ✕
+            </button>
+
+            <h2>📷 Scan Your Waste</h2>
+
+            <p>
+                Position the waste item inside the camera
+            </p>
+
+            <video
+                id="camera"
+                autoplay
+                playsinline>
+            </video>
+
+            <div class="camera-actions">
+
+                <button
+                    class="capture-btn"
+                    onclick="captureWasteImage()">
+                    📸 Capture & Analyze
                 </button>
 
-                <button class="example-btn" onclick="useExample('newspaper')">
-                    📄 Newspaper
-                </button>
-
-                <button class="example-btn" onclick="useExample('food waste')">
-                    🍎 Food Waste
-                </button>
-
-                <button class="example-btn" onclick="useExample('old mobile phone')">
-                    📱 Old Phone
+                <button
+                    class="cancel-btn"
+                    onclick="closeCamera()">
+                    Cancel
                 </button>
 
             </div>
 
-            <button onclick="analyzeWaste()">
-                🔍 Analyze Waste
-            </button>
+            <canvas id="cameraCanvas"></canvas>
 
-            <button class="clear-btn" onclick="clearResult()">
-                🧹 Clear
-            </button>
+        </div>
 
-            <div id="result">
-                <p>Enter a waste item to get guidance.</p>
+    </section>
+
+
+    <!-- RESULT -->
+
+    <section
+        id="resultSection"
+        class="result-section"
+        style="display:none;">
+
+        <div class="result-container">
+
+            <div class="result-top">
+
+                <div>
+
+                    <span class="result-label">
+                        ✨ AI ANALYSIS COMPLETE
+                    </span>
+
+                    <h2 id="resultTitle">
+                        Waste Identified
+                    </h2>
+
+                </div>
+
+                <div
+                    id="confidence"
+                    class="confidence">
+                    96% Confidence
+                </div>
+
             </div>
 
-        </section>
 
-    </main>
+            <!-- CATEGORY -->
+
+            <div class="category-card">
+
+                <div
+                    id="categoryIcon"
+                    class="category-icon">
+                    ♻️
+                </div>
+
+                <div>
+
+                    <span>WASTE CATEGORY</span>
+
+                    <h3 id="category">
+                        Recyclable
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTION CARDS -->
+
+            <div class="guidance-grid">
+
+                <div class="guidance-card">
+
+                    <div class="guidance-icon">
+                        🗑️
+                    </div>
+
+                    <div>
+
+                        <h3>Dispose</h3>
+
+                        <p id="disposeText">
+                            Follow the appropriate local
+                            waste collection method.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="guidance-card">
+
+                    <div class="guidance-icon">
+                        🔄
+                    </div>
+
+                    <div>
+
+                        <h3>Reuse / Recycle</h3>
+
+                        <p id="reuseText">
+                            Look for ways to reuse or recycle
+                            the material.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="guidance-card eco-card">
+
+                    <div class="guidance-icon">
+                        🌱
+                    </div>
+
+                    <div>
+
+                        <h3>Eco Tip</h3>
+
+                        <p id="tipText">
+                            Small responsible choices can
+                            reduce environmental impact.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="new-analysis"
+                onclick="clearResult()">
+
+                🔄 Analyze Another Item
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- IMPACT -->
+
+    <section class="impact-section">
+
+        <div class="impact-heading">
+
+            <span>🌍 OUR PURPOSE</span>
+
+            <h2>
+                Every better waste decision<br>
+                creates a better tomorrow.
+            </h2>
+
+        </div>
+
+
+        <div class="impact-grid">
+
+            <div class="impact-card">
+
+                <div>♻️</div>
+
+                <strong id="analyzedCount">
+                    128
+                </strong>
+
+                <span>
+                    Items Analyzed
+                </span>
+
+            </div>
+
+
+            <div class="impact-card">
+
+                <div>🌱</div>
+
+                <strong id="actionCount">
+                    94
+                </strong>
+
+                <span>
+                    Sustainable Actions
+                </span>
+
+            </div>
+
+
+            <div class="impact-card">
+
+                <div>🌍</div>
+
+                <strong>
+                    SDG 12
+                </strong>
+
+                <span>
+                    Responsible Consumption
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
 
     <footer>
-        <p>AI for Sustainability | SDG 12</p>
+
+        <div>
+            <strong>EcoVision AI</strong>
+            <span> | AI for Sustainability</span>
+        </div>
+
+        <p>
+            Designed for responsible waste management • SDG 12
+        </p>
+
     </footer>
+
 
     <script src="script.js"></script>
 
