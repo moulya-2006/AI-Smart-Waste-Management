@@ -153,6 +153,7 @@ const wasteData = {
 
 /* =====================================
    ANALYZE WASTE
+   CONNECTS WEBSITE TO FLASK BACKEND
 ===================================== */
 
 function analyzeWaste() {
@@ -177,25 +178,208 @@ function analyzeWaste() {
     showScanning();
 
 
-    setTimeout(() => {
+    setTimeout(async () => {
 
-        let result = findWaste(input);
+        try {
 
-        displayResult(result, input);
+            const response = await fetch(
+                "http://127.0.0.1:5000/analyze",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        waste: input
+                    })
+                }
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Backend request failed"
+                );
+
+            }
+
+
+            const result =
+                await response.json();
+
+
+            /*
+                The Flask backend returns:
+                category
+                dispose
+                reuse
+                tip
+
+                The frontend adds the icon.
+            */
+
+            result.icon =
+                getCategoryIcon(
+                    result.category
+                );
+
+
+            /*
+                This is a backend analysis result,
+                not a numerical confidence score.
+            */
+
+            result.confidence =
+                "Backend Analysis";
+
+
+            displayResult(
+                result,
+                input
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Backend error:",
+                error
+            );
+
+
+            /*
+                If Flask is not available,
+                fall back to the local database.
+            */
+
+            const localResult =
+                findWaste(input);
+
+
+            localResult.confidence =
+                "Local Guidance";
+
+
+            displayResult(
+                localResult,
+                input
+            );
+
+
+            alert(
+                "The EcoVision AI backend could not be reached.\n\n" +
+                "Showing local waste guidance instead.\n\n" +
+                "Make sure Flask is running on:\n" +
+                "http://127.0.0.1:5000"
+            );
+
+        }
 
     }, 1200);
+
+}
+
+
+/* =====================================
+   GET CATEGORY ICON
+===================================== */
+
+function getCategoryIcon(category) {
+
+    const text =
+        category
+            .toLowerCase();
+
+
+    if (
+        text.includes("electronic") ||
+        text.includes("e-waste")
+    ) {
+
+        return "📱";
+
+    }
+
+
+    if (
+        text.includes("plastic")
+    ) {
+
+        return "🧴";
+
+    }
+
+
+    if (
+        text.includes("paper") ||
+        text.includes("cardboard")
+    ) {
+
+        return "📄";
+
+    }
+
+
+    if (
+        text.includes("organic") ||
+        text.includes("food")
+    ) {
+
+        return "🍎";
+
+    }
+
+
+    if (
+        text.includes("glass")
+    ) {
+
+        return "🍾";
+
+    }
+
+
+    if (
+        text.includes("metal")
+    ) {
+
+        return "🥫";
+
+    }
+
+
+    if (
+        text.includes("hazardous")
+    ) {
+
+        return "⚠️";
+
+    }
+
+
+    return "🔎";
+
 }
 
 
 /* =====================================
    FIND WASTE
+   LOCAL FALLBACK
 ===================================== */
 
 function findWaste(input) {
 
-    for (const keyword in wasteData) {
+    for (
+        const keyword in wasteData
+    ) {
 
-        if (input.includes(keyword)) {
+        if (
+            input.includes(keyword)
+        ) {
 
             return wasteData[keyword];
 
@@ -206,9 +390,14 @@ function findWaste(input) {
 
     return {
 
-        category: "Waste Item Not Clearly Identified",
-        icon: "🔎",
-        confidence: "Needs Review",
+        category:
+            "Waste Item Not Clearly Identified",
+
+        icon:
+            "🔎",
+
+        confidence:
+            "Needs Review",
 
         dispose:
             "Check your local waste-management guidance before disposing of this item.",
@@ -218,7 +407,9 @@ function findWaste(input) {
 
         tip:
             "When unsure, avoid mixing potentially recyclable or hazardous waste with general waste."
+
     };
+
 }
 
 
@@ -229,22 +420,32 @@ function findWaste(input) {
 function showScanning() {
 
     const scannerArea =
-        document.getElementById("scannerArea");
+        document.getElementById(
+            "scannerArea"
+        );
 
     const title =
-        document.getElementById("scannerTitle");
+        document.getElementById(
+            "scannerTitle"
+        );
 
     const text =
-        document.getElementById("scannerText");
+        document.getElementById(
+            "scannerText"
+        );
 
 
     title.innerHTML =
         "AI is analyzing your waste...";
 
+
     text.innerHTML =
         "Identifying category and sustainable action";
 
-    scannerArea.classList.add("analyzing");
+
+    scannerArea.classList.add(
+        "analyzing"
+    );
 
 }
 
@@ -253,76 +454,119 @@ function showScanning() {
    DISPLAY RESULT
 ===================================== */
 
-function displayResult(result, originalInput) {
+function displayResult(
+    result,
+    originalInput
+) {
 
     document
-        .getElementById("scannerArea")
-        .classList.remove("analyzing");
+        .getElementById(
+            "scannerArea"
+        )
+        .classList.remove(
+            "analyzing"
+        );
 
 
     document
-        .getElementById("scannerTitle")
+        .getElementById(
+            "scannerTitle"
+        )
         .innerHTML =
         "Analysis ready";
 
+
     document
-        .getElementById("scannerText")
+        .getElementById(
+            "scannerText"
+        )
         .innerHTML =
         "Your waste guidance is below";
 
 
     document
-        .getElementById("resultSection")
-        .style.display = "block";
+        .getElementById(
+            "resultSection"
+        )
+        .style.display =
+        "block";
 
 
     document
-        .getElementById("categoryIcon")
-        .innerHTML = result.icon;
-
-
-    document
-        .getElementById("category")
-        .innerHTML = result.category;
-
-
-    document
-        .getElementById("confidence")
+        .getElementById(
+            "categoryIcon"
+        )
         .innerHTML =
-        result.confidence === "Needs Review"
+        result.icon;
+
+
+    document
+        .getElementById(
+            "category"
+        )
+        .innerHTML =
+        result.category;
+
+
+    document
+        .getElementById(
+            "confidence"
+        )
+        .innerHTML =
+        result.confidence ===
+        "Needs Review"
+
             ? "⚠️ Needs Review"
-            : result.confidence + " Confidence";
+
+            : result.confidence;
 
 
     document
-        .getElementById("disposeText")
-        .innerHTML = result.dispose;
-
-
-    document
-        .getElementById("reuseText")
-        .innerHTML = result.reuse;
-
-
-    document
-        .getElementById("tipText")
-        .innerHTML = result.tip;
-
-
-    document
-        .getElementById("resultTitle")
+        .getElementById(
+            "disposeText"
+        )
         .innerHTML =
-        "♻️ " + capitalize(originalInput);
+        result.dispose;
 
 
     document
-        .getElementById("resultSection")
+        .getElementById(
+            "reuseText"
+        )
+        .innerHTML =
+        result.reuse;
+
+
+    document
+        .getElementById(
+            "tipText"
+        )
+        .innerHTML =
+        result.tip;
+
+
+    document
+        .getElementById(
+            "resultTitle"
+        )
+        .innerHTML =
+        "♻️ " +
+        capitalize(
+            originalInput
+        );
+
+
+    document
+        .getElementById(
+            "resultSection"
+        )
         .scrollIntoView({
             behavior: "smooth"
         });
 
 
     updateImpact();
+
 }
 
 
@@ -330,14 +574,22 @@ function displayResult(result, originalInput) {
    EXAMPLES
 ===================================== */
 
-function useExample(example) {
+function useExample(
+    example
+) {
 
     document
-        .getElementById("wasteInput")
-        .value = example;
+        .getElementById(
+            "wasteInput"
+        )
+        .value =
+        example;
+
 
     document
-        .getElementById("wasteInput")
+        .getElementById(
+            "wasteInput"
+        )
         .focus();
 
 }
@@ -350,23 +602,33 @@ function useExample(example) {
 function clearResult() {
 
     document
-        .getElementById("resultSection")
-        .style.display = "none";
+        .getElementById(
+            "resultSection"
+        )
+        .style.display =
+        "none";
 
 
     document
-        .getElementById("wasteInput")
-        .value = "";
+        .getElementById(
+            "wasteInput"
+        )
+        .value =
+        "";
 
 
     document
-        .getElementById("scannerTitle")
+        .getElementById(
+            "scannerTitle"
+        )
         .innerHTML =
         "What do you want to analyze?";
 
 
     document
-        .getElementById("scannerText")
+        .getElementById(
+            "scannerText"
+        )
         .innerHTML =
         "Scan, upload, speak or type your waste item";
 
@@ -397,6 +659,7 @@ function startVoiceInput() {
         );
 
         return;
+
     }
 
 
@@ -404,60 +667,82 @@ function startVoiceInput() {
         new SpeechRecognition();
 
 
-    recognition.lang = "en-IN";
-
-    recognition.interimResults = false;
-
-    recognition.continuous = false;
+    recognition.lang =
+        "en-IN";
 
 
-    recognition.onstart = function () {
-
-        document
-            .getElementById("scannerTitle")
-            .innerHTML =
-            "🎤 Listening...";
-
-        document
-            .getElementById("scannerText")
-            .innerHTML =
-            "Tell me the name of the waste item";
-
-    };
+    recognition.interimResults =
+        false;
 
 
-    recognition.onresult = function (event) {
-
-        const spokenText =
-            event.results[0][0].transcript;
+    recognition.continuous =
+        false;
 
 
-        document
-            .getElementById("wasteInput")
-            .value = spokenText;
+    recognition.onstart =
+        function () {
+
+            document
+                .getElementById(
+                    "scannerTitle"
+                )
+                .innerHTML =
+                "🎤 Listening...";
 
 
-        document
-            .getElementById("scannerTitle")
-            .innerHTML =
-            "Voice captured";
+            document
+                .getElementById(
+                    "scannerText"
+                )
+                .innerHTML =
+                "Tell me the name of the waste item";
+
+        };
 
 
-        document
-            .getElementById("scannerText")
-            .innerHTML =
-            "Press Analyze with AI to continue";
+    recognition.onresult =
+        function (event) {
 
-    };
+            const spokenText =
+                event
+                    .results[0][0]
+                    .transcript;
 
 
-    recognition.onerror = function () {
+            document
+                .getElementById(
+                    "wasteInput"
+                )
+                .value =
+                spokenText;
 
-        alert(
-            "Voice input could not be completed. Please try again."
-        );
 
-    };
+            document
+                .getElementById(
+                    "scannerTitle"
+                )
+                .innerHTML =
+                "Voice captured";
+
+
+            document
+                .getElementById(
+                    "scannerText"
+                )
+                .innerHTML =
+                "Press Analyze with AI to continue";
+
+        };
+
+
+    recognition.onerror =
+        function () {
+
+            alert(
+                "Voice input could not be completed. Please try again."
+            );
+
+        };
 
 
     recognition.start();
@@ -469,37 +754,46 @@ function startVoiceInput() {
    CAMERA
 ===================================== */
 
-let cameraStream = null;
+let cameraStream =
+    null;
 
 
 async function openCamera() {
 
     const cameraArea =
-        document.getElementById("cameraArea");
+        document.getElementById(
+            "cameraArea"
+        );
 
 
     try {
 
         cameraStream =
-            await navigator.mediaDevices.getUserMedia({
+            await navigator
+                .mediaDevices
+                .getUserMedia({
 
-                video: {
-                    facingMode: {
-                        ideal: "environment"
-                    }
-                },
+                    video: {
+                        facingMode: {
+                            ideal: "environment"
+                        }
+                    },
 
-                audio: false
+                    audio: false
 
-            });
+                });
 
 
         document
-            .getElementById("camera")
-            .srcObject = cameraStream;
+            .getElementById(
+                "camera"
+            )
+            .srcObject =
+            cameraStream;
 
 
-        cameraArea.style.display = "flex";
+        cameraArea.style.display =
+            "flex";
 
     }
 
@@ -508,6 +802,7 @@ async function openCamera() {
         alert(
             "Camera access was not available. Please allow camera permission and try again."
         );
+
 
         console.error(error);
 
@@ -523,10 +818,15 @@ async function openCamera() {
 function captureWasteImage() {
 
     const video =
-        document.getElementById("camera");
+        document.getElementById(
+            "camera"
+        );
+
 
     const canvas =
-        document.getElementById("cameraCanvas");
+        document.getElementById(
+            "cameraCanvas"
+        );
 
 
     if (!video.videoWidth) {
@@ -536,16 +836,22 @@ function captureWasteImage() {
         );
 
         return;
+
     }
 
 
-    canvas.width = video.videoWidth;
+    canvas.width =
+        video.videoWidth;
 
-    canvas.height = video.videoHeight;
+
+    canvas.height =
+        video.videoHeight;
 
 
     const context =
-        canvas.getContext("2d");
+        canvas.getContext(
+            "2d"
+        );
 
 
     context.drawImage(
@@ -558,7 +864,9 @@ function captureWasteImage() {
 
 
     const imageData =
-        canvas.toDataURL("image/jpeg");
+        canvas.toDataURL(
+            "image/jpeg"
+        );
 
 
     console.log(
@@ -568,13 +876,16 @@ function captureWasteImage() {
 
 
     /*
-       IMPORTANT:
+        CURRENT STATUS:
 
-       The image is successfully captured here.
+        The photo has been successfully
+        captured and converted to Base64.
 
-       A real AI vision model still needs to be
-       connected to this image before claiming that
-       the image itself has been AI classified.
+        The actual AI vision model is NOT
+        connected yet.
+
+        We will connect the image to the
+        backend/vision model in the next stage.
     */
 
 
@@ -582,25 +893,32 @@ function captureWasteImage() {
 
 
     document
-        .getElementById("scannerTitle")
+        .getElementById(
+            "scannerTitle"
+        )
         .innerHTML =
         "📸 Image captured";
 
 
     document
-        .getElementById("scannerText")
+        .getElementById(
+            "scannerText"
+        )
         .innerHTML =
         "Ready for AI waste identification";
 
 
     document
-        .getElementById("wasteInput")
+        .getElementById(
+            "wasteInput"
+        )
         .value =
         "Captured waste image";
 
 
     alert(
-        "Image captured successfully! AI image analysis will be connected next."
+        "Image captured successfully!\n\n" +
+        "The image is ready to be connected to the AI vision model."
     );
 
 }
@@ -613,26 +931,37 @@ function captureWasteImage() {
 function closeCamera() {
 
     const cameraArea =
-        document.getElementById("cameraArea");
+        document.getElementById(
+            "cameraArea"
+        );
 
 
     if (cameraStream) {
 
         cameraStream
             .getTracks()
-            .forEach(track => track.stop());
+            .forEach(
+                track =>
+                    track.stop()
+            );
 
-        cameraStream = null;
+
+        cameraStream =
+            null;
 
     }
 
 
     document
-        .getElementById("camera")
-        .srcObject = null;
+        .getElementById(
+            "camera"
+        )
+        .srcObject =
+        null;
 
 
-    cameraArea.style.display = "none";
+    cameraArea.style.display =
+        "none";
 
 }
 
@@ -645,13 +974,17 @@ function updateImpact() {
 
     let analyzed =
         Number(
-            localStorage.getItem("ecoAnalyzed")
+            localStorage.getItem(
+                "ecoAnalyzed"
+            )
         ) || 128;
 
 
     let actions =
         Number(
-            localStorage.getItem("ecoActions")
+            localStorage.getItem(
+                "ecoActions"
+            )
         ) || 94;
 
 
@@ -673,13 +1006,19 @@ function updateImpact() {
 
 
     document
-        .getElementById("analyzedCount")
-        .innerHTML = analyzed;
+        .getElementById(
+            "analyzedCount"
+        )
+        .innerHTML =
+        analyzed;
 
 
     document
-        .getElementById("actionCount")
-        .innerHTML = actions;
+        .getElementById(
+            "actionCount"
+        )
+        .innerHTML =
+        actions;
 
 }
 
@@ -691,20 +1030,31 @@ function updateImpact() {
 function loadImpactNumbers() {
 
     const analyzed =
-        localStorage.getItem("ecoAnalyzed") || 128;
+        localStorage.getItem(
+            "ecoAnalyzed"
+        ) || 128;
+
 
     const actions =
-        localStorage.getItem("ecoActions") || 94;
+        localStorage.getItem(
+            "ecoActions"
+        ) || 94;
 
 
     document
-        .getElementById("analyzedCount")
-        .innerHTML = analyzed;
+        .getElementById(
+            "analyzedCount"
+        )
+        .innerHTML =
+        analyzed;
 
 
     document
-        .getElementById("actionCount")
-        .innerHTML = actions;
+        .getElementById(
+            "actionCount"
+        )
+        .innerHTML =
+        actions;
 
 }
 
@@ -715,10 +1065,11 @@ function loadImpactNumbers() {
 
 function capitalize(text) {
 
-    return text
-        .replace(/\b\w/g, letter =>
+    return text.replace(
+        /\b\w/g,
+        letter =>
             letter.toUpperCase()
-        );
+    );
 
 }
 
@@ -727,9 +1078,16 @@ function capitalize(text) {
    MESSAGE
 ===================================== */
 
-function showMessage(title, message) {
+function showMessage(
+    title,
+    message
+) {
 
-    alert(title + "\n\n" + message);
+    alert(
+        title +
+        "\n\n" +
+        message
+    );
 
 }
 
@@ -739,3 +1097,899 @@ function showMessage(title, message) {
 ===================================== */
 
 loadImpactNumbers();
+/* =====================================================
+   ECOVISION AI - ADVANCED FEATURES
+===================================================== */
+
+const ECO_BACKEND = "http://127.0.0.1:5000";
+
+
+/* =====================================================
+   HISTORY
+===================================================== */
+
+async function loadHistory() {
+
+    try {
+
+        const response = await fetch(
+            `${ECO_BACKEND}/history`
+        );
+
+        const history = await response.json();
+
+        console.log("EcoVision History:", history);
+
+        localStorage.setItem(
+            "ecoHistory",
+            JSON.stringify(history)
+        );
+
+        return history;
+
+    } catch (error) {
+
+        console.error(
+            "History error:",
+            error
+        );
+
+        return [];
+    }
+}
+
+
+/* =====================================================
+   SHOW HISTORY
+===================================================== */
+
+async function showHistory() {
+
+    const history =
+        await loadHistory();
+
+    if (!history.length) {
+
+        alert(
+            "No waste analysis history yet."
+        );
+
+        return;
+    }
+
+    let message =
+        "♻️ ECOVISION AI HISTORY\n\n";
+
+    history.forEach(
+        (item, index) => {
+
+            message +=
+                `${index + 1}. ${item.waste}\n`;
+
+            message +=
+                `Category: ${item.category}\n`;
+
+            message +=
+                `Date: ${new Date(
+                    item.created_at
+                ).toLocaleString()}\n\n`;
+        }
+    );
+
+    alert(message);
+}
+
+
+/* =====================================================
+   CLEAR HISTORY
+===================================================== */
+
+async function clearHistory() {
+
+    const confirmDelete =
+        confirm(
+            "Clear all waste analysis history?"
+        );
+
+    if (!confirmDelete) {
+        return;
+    }
+
+    try {
+
+        await fetch(
+            `${ECO_BACKEND}/history`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        alert(
+            "History cleared successfully."
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Could not clear history."
+        );
+    }
+}
+
+
+/* =====================================================
+   ANALYTICS
+===================================================== */
+
+async function loadAnalytics() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${ECO_BACKEND}/analytics`
+            );
+
+        const data =
+            await response.json();
+
+        console.log(
+            "AI Waste Analytics:",
+            data
+        );
+
+        return data;
+
+    } catch (error) {
+
+        console.error(
+            "Analytics error:",
+            error
+        );
+
+        return null;
+    }
+}
+
+
+/* =====================================================
+   WASTE PREDICTION
+===================================================== */
+
+async function getWastePrediction() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${ECO_BACKEND}/prediction`
+            );
+
+        const data =
+            await response.json();
+
+        alert(
+            "🔮 WASTE PREDICTION\n\n" +
+            data.prediction
+        );
+
+    } catch (error) {
+
+        alert(
+            "Prediction service unavailable."
+        );
+    }
+}
+
+
+/* =====================================================
+   DONATION SUGGESTION
+===================================================== */
+
+async function suggestDonation(item) {
+
+    if (!item) {
+
+        item =
+            document
+                .getElementById("wasteInput")
+                .value
+                .trim();
+    }
+
+    if (!item) {
+
+        alert(
+            "Enter an item first."
+        );
+
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `${ECO_BACKEND}/donation`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        item: item
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        alert(
+            "❤️ DONATION SUGGESTIONS\n\n" +
+            data.suggestions.join("\n\n")
+        );
+
+    } catch (error) {
+
+        alert(
+            "Donation service unavailable."
+        );
+    }
+}
+
+
+/* =====================================================
+   WASTE PICKUP
+===================================================== */
+
+async function requestWastePickup() {
+
+    const waste =
+        document
+            .getElementById("wasteInput")
+            .value
+            .trim();
+
+    if (!waste) {
+
+        alert(
+            "Enter the waste item first."
+        );
+
+        return;
+    }
+
+    const location =
+        prompt(
+            "Enter pickup location:"
+        );
+
+    if (!location) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `${ECO_BACKEND}/pickup`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        waste: waste,
+                        location: location
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        alert(
+            "🚚 Pickup Request\n\n" +
+            data.status +
+            "\nRequest ID: " +
+            data.request_id
+        );
+
+    } catch (error) {
+
+        alert(
+            "Pickup service unavailable."
+        );
+    }
+}
+
+
+/* =====================================================
+   CAMPUS MODE
+===================================================== */
+
+async function activateCampusMode() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${ECO_BACKEND}/campus`
+            );
+
+        const data =
+            await response.json();
+
+        alert(
+            "🏫 COLLEGE / CAMPUS MODE\n\n" +
+            "Items analyzed: " +
+            data.items_analyzed +
+            "\n\n" +
+            data.message
+        );
+
+    } catch (error) {
+
+        alert(
+            "Campus mode unavailable."
+        );
+    }
+}
+
+
+/* =====================================================
+   ADMIN DASHBOARD
+===================================================== */
+
+async function openAdminDashboard() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${ECO_BACKEND}/admin`
+            );
+
+        const data =
+            await response.json();
+
+        alert(
+            "👨‍💼 ADMIN DASHBOARD\n\n" +
+
+            "System: " +
+            data.system_status +
+
+            "\n\nItems analyzed: " +
+            data.total_analyzed +
+
+            "\nPickup requests: " +
+            data.pickup_requests +
+
+            "\nDonation records: " +
+            data.donation_records
+        );
+
+    } catch (error) {
+
+        alert(
+            "Admin dashboard unavailable."
+        );
+    }
+}
+
+
+/* =====================================================
+   IOT SMART BIN
+===================================================== */
+
+async function checkSmartBin() {
+
+    const fillLevel =
+        prompt(
+            "Enter smart-bin fill level (%)",
+            "75"
+        );
+
+    if (fillLevel === null) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `${ECO_BACKEND}/iot-bin`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        bin: "EcoVision Smart Bin",
+                        fill_level:
+                            Number(fillLevel)
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        alert(
+            "🤖 IoT SMART BIN\n\n" +
+            "Fill level: " +
+            data.fill_level +
+            "%\n\n" +
+            "Status: " +
+            data.status
+        );
+
+    } catch (error) {
+
+        alert(
+            "Smart bin service unavailable."
+        );
+    }
+}
+
+
+/* =====================================================
+   GAMIFICATION
+===================================================== */
+
+function updateBadges() {
+
+    const count =
+        Number(
+            localStorage.getItem(
+                "ecoAnalyzed"
+            )
+        ) || 0;
+
+    let badges = [];
+
+    if (count >= 1) {
+        badges.push("🌱 First Step");
+    }
+
+    if (count >= 5) {
+        badges.push("♻️ Recycling Explorer");
+    }
+
+    if (count >= 10) {
+        badges.push("🌍 Eco Champion");
+    }
+
+    if (count >= 25) {
+        badges.push("🏆 Sustainability Hero");
+    }
+
+    localStorage.setItem(
+        "ecoBadges",
+        JSON.stringify(badges)
+    );
+
+    console.log(
+        "EcoVision Badges:",
+        badges
+    );
+
+    return badges;
+}
+
+
+/* =====================================================
+   MULTILINGUAL SUPPORT
+===================================================== */
+
+const ecoTranslations = {
+
+    en: {
+        analyzing:
+            "AI is analyzing your waste..."
+    },
+
+    hi: {
+        analyzing:
+            "AI आपके कचरे का विश्लेषण कर रहा है..."
+    },
+
+    kn: {
+        analyzing:
+            "AI ನಿಮ್ಮ ತ್ಯಾಜ್ಯವನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತಿದೆ..."
+    }
+};
+
+
+function changeLanguage(language) {
+
+    const translation =
+        ecoTranslations[language];
+
+    if (!translation) {
+        return;
+    }
+
+    const title =
+        document.getElementById(
+            "scannerTitle"
+        );
+
+    if (title) {
+
+        title.innerHTML =
+            translation.analyzing;
+    }
+
+    localStorage.setItem(
+        "ecoLanguage",
+        language
+    );
+}
+
+
+/* =====================================================
+   VOICE ASSISTANT
+===================================================== */
+
+function speakResult(text) {
+
+    if (!("speechSynthesis" in window)) {
+
+        alert(
+            "Voice assistant is not supported."
+        );
+
+        return;
+    }
+
+    const speech =
+        new SpeechSynthesisUtterance(
+            text
+        );
+
+    speech.lang =
+        localStorage.getItem(
+            "ecoLanguage"
+        ) === "kn"
+            ? "kn-IN"
+            : "en-IN";
+
+    speech.rate = 0.9;
+
+    window.speechSynthesis.speak(
+        speech
+    );
+}
+
+
+/* =====================================================
+   AI FEATURE MENU
+===================================================== */
+
+function showEcoVisionFeatures() {
+
+    alert(
+        "🌱 ECOVISION AI FEATURES\n\n" +
+
+        "🌍 Multilingual Support\n" +
+        "🎤 Voice Assistant\n" +
+        "🏆 Gamification & Badges\n" +
+        "📈 AI Waste Analytics\n" +
+        "🔮 Waste Prediction\n" +
+        "❤️ Donation Suggestions\n" +
+        "🚚 Waste Pickup Requests\n" +
+        "🏫 College/Campus Mode\n" +
+        "👨‍💼 Admin Dashboard\n" +
+        "🤖 IoT Smart Bin Integration"
+    );
+}
+
+
+/* =====================================================
+   INITIALIZE ADVANCED FEATURES
+===================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+        loadAnalytics();
+
+        updateBadges();
+
+        loadHistory();
+
+        console.log(
+            "🌱 EcoVision AI Advanced Features Ready"
+        );
+
+    }
+);  
+
+// =====================================================
+// ECOVISION AI - HISTORY
+// =====================================================
+
+const HISTORY_API = "http://127.0.0.1:5000";
+
+async function loadHistory() {
+
+    const container = document.getElementById("historyContainer");
+
+    if (!container) return;
+
+    container.innerHTML = "<p>Loading history...</p>";
+
+    try {
+
+        const response = await fetch(`${HISTORY_API}/history`);
+
+        if (!response.ok) {
+            throw new Error("Unable to load history");
+        }
+
+        const history = await response.json();
+
+        if (!history || history.length === 0) {
+
+            container.innerHTML = `
+                <div class="history-card">
+                    <h3>📭 No History Yet</h3>
+                    <p>Analyze some waste items to see them here.</p>
+                </div>
+            `;
+
+            return;
+        }
+
+        container.innerHTML = history.map(item => `
+
+            <div class="history-card">
+
+                <h3>♻️ ${escapeHistoryText(item.waste)}</h3>
+
+                <div class="history-category">
+                    📂 ${escapeHistoryText(item.category)}
+                </div>
+
+                <p>
+                    🗑️ <strong>Dispose:</strong><br>
+                    ${escapeHistoryText(item.dispose)}
+                </p>
+
+                <p>
+                    🔄 <strong>Reuse / Recycle:</strong><br>
+                    ${escapeHistoryText(item.reuse)}
+                </p>
+
+                <p>
+                    🌱 <strong>Eco Tip:</strong><br>
+                    ${escapeHistoryText(item.tip)}
+                </p>
+
+                <div class="history-date">
+                    🕒 ${formatHistoryDate(item.created_at)}
+                </div>
+
+            </div>
+
+        `).join("");
+
+    } catch (error) {
+
+        console.error("History error:", error);
+
+        container.innerHTML = `
+            <div class="history-card">
+                <h3>⚠️ History Unavailable</h3>
+                <p>
+                    Please make sure the EcoVision AI backend
+                    is running on port 5000.
+                </p>
+            </div>
+        `;
+    }
+}
+
+
+// Safely display database text
+function escapeHistoryText(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+// Format date
+function formatHistoryDate(dateString) {
+
+    if (!dateString) return "Unknown date";
+
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+        return dateString;
+    }
+
+    return date.toLocaleString("en-IN");
+}
+
+
+// Clear database history
+async function clearHistory() {
+
+    const confirmDelete = confirm(
+        "Are you sure you want to delete all waste analysis history?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+
+        const response = await fetch(
+            `${HISTORY_API}/history`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Unable to clear history");
+        }
+
+        alert("History cleared successfully.");
+
+        loadHistory();
+
+    } catch (error) {
+
+        console.error("Clear history error:", error);
+
+        alert(
+            "Could not clear history. Make sure the backend is running."
+        );
+    }
+}
+
+
+// Automatically load history when page opens
+document.addEventListener("DOMContentLoaded", function () {
+
+    loadHistory();
+
+});
+
+// =====================================================
+// ECOVISION AI - ANALYTICS
+// =====================================================
+
+async function loadAnalytics() {
+
+    try {
+
+        const response = await fetch(`${HISTORY_API}/analytics`);
+
+        if (!response.ok) {
+            throw new Error("Analytics unavailable");
+        }
+
+        const data = await response.json();
+
+        console.log("Analytics:", data);
+
+        const total = document.getElementById("analyticsTotal");
+        const top = document.getElementById("analyticsTop");
+        const categories = document.getElementById("analyticsCategories");
+        const breakdown = document.getElementById("analyticsBreakdown");
+
+        if (!total) return;
+
+        /*
+         * The backend may return different field names.
+         * We handle the common formats.
+         */
+
+        const totalItems =
+            data.total ||
+            data.total_items ||
+            data.count ||
+            0;
+
+        total.textContent = totalItems;
+
+        let categoryData =
+            data.categories ||
+            data.breakdown ||
+            data.category_counts ||
+            {};
+
+        if (Array.isArray(categoryData)) {
+
+            const converted = {};
+
+            categoryData.forEach(item => {
+
+                const name =
+                    item.category ||
+                    item.name ||
+                    "Other";
+
+                const count =
+                    item.count ||
+                    item.total ||
+                    0;
+
+                converted[name] = count;
+            });
+
+            categoryData = converted;
+        }
+
+        const entries = Object.entries(categoryData);
+
+        categories.textContent = entries.length;
+
+        if (entries.length > 0) {
+
+            entries.sort((a, b) => b[1] - a[1]);
+
+            top.textContent = entries[0][0];
+
+            breakdown.innerHTML = entries.map(([category, count]) => `
+
+                <div class="analytics-row">
+
+                    <span>♻️ ${escapeHistoryText(category)}</span>
+
+                    <strong>${count}</strong>
+
+                </div>
+
+            `).join("");
+
+        } else {
+
+            top.textContent = "-";
+
+            breakdown.innerHTML =
+                "<p>No analytics data available yet.</p>";
+        }
+
+    } catch (error) {
+
+        console.error("Analytics error:", error);
+
+        const breakdown =
+            document.getElementById("analyticsBreakdown");
+
+        if (breakdown) {
+
+            breakdown.innerHTML = `
+                <p>
+                    ⚠️ Analytics unavailable.
+                    Make sure the Flask backend is running.
+                </p>
+            `;
+        }
+    }
+}   

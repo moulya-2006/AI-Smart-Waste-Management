@@ -435,6 +435,59 @@
         <p>
             Designed for responsible waste management • SDG 12
         </p>
+        <!-- ================= HISTORY ================= -->
+<section class="history-section">
+    <div class="section-heading">
+        <span>📜 YOUR ACTIVITY</span>
+        <h2>Waste Analysis History</h2>
+        <p>View the waste items you have analyzed.</p>
+    </div>
+
+    <div class="history-actions">
+        <button onclick="loadHistory()">🔄 Refresh History</button>
+        <button onclick="clearHistory()">🗑️ Clear History</button>
+    </div>
+
+    <div id="historyContainer" class="history-container">
+        <p>Loading history...</p>
+    </div>
+</section>
+<!-- ================= ANALYTICS ================= -->
+<section class="analytics-section">
+
+    <div class="section-heading">
+        <span>📈 AI WASTE ANALYTICS</span>
+        <h2>Waste Analytics Dashboard</h2>
+        <p>Understand your waste analysis patterns.</p>
+    </div>
+
+    <div class="analytics-grid">
+
+        <div class="analytics-card">
+            <span>♻️</span>
+            <h3 id="analyticsTotal">0</h3>
+            <p>Total Items</p>
+        </div>
+
+        <div class="analytics-card">
+            <span>🏆</span>
+            <h3 id="analyticsTop">-</h3>
+            <p>Most Common Waste</p>
+        </div>
+
+        <div class="analytics-card">
+            <span>🌱</span>
+            <h3 id="analyticsCategories">0</h3>
+            <p>Categories Found</p>
+        </div>
+
+    </div>
+
+    <div class="analytics-card-list" id="analyticsBreakdown">
+        Loading analytics...
+    </div>
+
+</section>
 
     </footer>
 
